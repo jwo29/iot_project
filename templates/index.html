@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta authors="이지우">
+        <title>Check The Number Of Visitors</title>
+        <!-- <link rel="stylesheet" type="text/css" href="../static/style.css"/> -->
+        <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static', filename='style.css') }}" />
+    </head>
+    <body>
+        <div class="body-section">
+            <div id="main-screen">
+                <header>
+                    <div class="title-section">
+                        <h1 id="header-title">Check The Number Of Visitors</h1>
+                        <h4 id="header-desc">
+                            <!-- changable -->
+                        </h4>
+                    </div>
+                </header>
+                <div class="main-section">
+                    <!-- changable -->
+                    <canvas id="myCanvas" width="700" height="290"></canvas>
+                    <div id="sensor-state">
+                        <h4 id="sensor-state-text">Sensor is stopping</h4>
+                        <img id="sensor-state-img" src="../static/image/sensor_off.png" alt="sensor off"/>
+                    </div>
+                </div>
+            </div>
+            <div class="control-section">
+                <!-- changable -->
+                {% if sensor.state == True %}
+                    <a href="/sensor/off"><button id="sensor-ctrl-btn">SENSOR OFF</button></a>
+                {% else %}
+                    <a href="/sensor/on"><button id="sensor-ctrl-btn">SENSOR ON</button></a>
+                {% endif %}
+                <button id="load-btn">LOAD DATA</button>
+                <button id="play-btn">PLAY</button>
+                <a id="save-link"><button id="save-btn">SAVE AS MP4</button></a>
+                <button id="progm-ctrl-btn" onclick="resetAndRestart()">RESET&<br/>RESTART</button>
+            </div>    
+        </div>
+    </body>
+    <!-- <script src="../static/circle.js"></script> -->
+    <script src="{{ url_for('static', filename='circle.js') }}"></script>
+    <script>
+        
+        var sensorState = document.querySelector("#sensor-state");
+        var sensorStateText = document.querySelector("#sensor-state-text");
+        var sensorStateImg = document.querySelector("#sensor-state-img");
+
+        // var sensorBtn = document.querySelector("#sensor-ctrl-btn");
+        var loadBtn = document.querySelector("#load-btn");
+        var playBtn = document.querySelector("#play-btn");
+        var saveLink = document.querySelector("#save-link");
+        var saveBtn = document.querySelector("#save-btn");
+
+        // 버튼 이벤트 리스너 등록
+        // sensorBtn.addEventListener('click', sensorOnOff);
+        loadBtn.addEventListener('click', loadData);
+        playBtn.addEventListener('click', move_circle);
+
+        function sensorOnOff() {
+            fetch('/sensor/on')
+            .then(response=> response.text())
+            .then(data=>{
+                console.log(data)
+                if (data === "ok"){
+                    sensorBtn.textContent = "SENSOR OFF"
+                    sensorStateText.innerHTML = "Sensor is working";
+                    sensorStateImg.src = "../static/image/sensor_on.png"; 
+                    sensorStateImg.alt = "sensor on";
+                }
+            });
+        }
+
+        // function sensorOnOff() {
+        //     if(sensorBtn.textContent === "SENSOR ON"){
+        //         sensorBtn.textContent = "SENSOR OFF"
+        //         sensorStateText.innerHTML = "Sensor is working";
+        //         sensorStateImg.src = "./sensor_on.png"; 
+        //         sensorStateImg.alt = "sensor on";
+                
+        //     } else {
+        //         sensorBtn.style.display = "none";
+        //         loadBtn.style.display = "inline";
+
+        //         sensorStateText.innerHTML = "Sensor is stopping";
+        //         sensorStateImg.src = "./sensor_off.png";
+        //         sensorStateImg.alt = "sensor off";
+        //     }
+        // }     
+
+        function loadData() {
+            sensorState.style.display = "none";
+            loadBtn.style.display = "none";
+            playBtn.style.display = "inline";
+            canvas.style.display = "inline";
+
+            context.fillStyle = "white";
+            context.fillRect(0, 0, canvas.width, canvas.height);
+
+            circles.forEach((circle) => {
+                circle.draw();
+            })
+        }
+
+        function move_circle() {
+            playBtn.style.display = "none";
+            const chunks = [];
+            const streem = canvas.captureStream(25);
+            const rec = new MediaRecorder(streem);
+
+            rec.ondataavailable = e => chunks.push(e.data);
+
+            rec.onstop = function() {
+                exportVid(new Blob(chunks, {type: 'video/webm'}));
+                // loadData();
+                pause();
+            }
+            
+            rec.start();
+
+            play(); // 애니메이션 시작
+            // 버튼 클릭 비활성화
+            
+            setTimeout(()=>rec.stop(), 5000); // 3초 후 애니메이션 종료
+            // 끝난 후 다시 활성화(?)
+        }
+
+        function exportVid(blob) {
+            const src = URL.createObjectURL(blob);
+            saveLink.download = 'myvid.webm';
+            saveLink.href = src;
+            saveLink.style.display = "inline";
+            saveBtn.style.display = "inline";
+        }
+
+        function make_gif(){
+            fetch('/makegif')
+            .then(response=> response.text())
+            .then(data=> {
+                if(data == "ok")
+                    alert("complete convertion!");
+            });
+        }
+
+        function resetAndRestart() {
+            // 데이터베이스의 detect 테이블의 모든 레코드 삭제 & 페이지 리로드
+            window.location.reload();
+        }
+    </script>
+    <script>
+        const MAX = 2;
+        const MIN = -2;
+
+        const count = 10;
+        const circles = [];
+
+        const radiuses = [];
+        var totalLenght = 0;
+
+        for(let i = 0; i < count; i++){
+            const radius = Math.floor(Math.random() * 35) + 5;
+            radiuses.push(radius);
+            totalLenght += radius * 2;
+        }
+
+        totalLenght -= (count - 1) * 5;
+
+        var startPos = (canvas.width - totalLenght) / 2;
+        for(let i = 0; i < count; i++){
+            const radius = radiuses[i];
+            const x = startPos + radius;
+
+            const y = canvas.height / 2;
+            const dx = Math.floor(Math.random() * (MAX - MIN) + MIN); // -2 ~ 2의 속도
+            const dy = Math.floor(Math.random() * (MAX - MIN) + MIN); // -2 ~ 2의 속도
+
+            // 랜덤 색상 만들기
+            const r = Math.round(Math.random() * 255);
+            const g = Math.round(Math.random() * 255);
+            const b = Math.round(Math.random() * 255);
+
+            const circle = new Circle(x, y, radius, dx, dy, r, g, b);
+            circles.push(circle);
+
+            startPos = x + radius - 5;
+        }
+
+        // render 함수
+        function layer() {
+            context.fillStyle = "white";
+            context.fillRect(0, 0, canvas.width, canvas.height);
+
+            circles.forEach((circle) => {
+                circle.draw();
+                circle.acc();
+                // circle.line();
+                // circle.text();
+            })
+        }
+    </script>
+</html>

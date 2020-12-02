@@ -1,0 +1,139 @@
+body{
+    color: black;
+    font-family: 나눔바른펜, 굴림;
+    margin: 0px;
+    background-color: rgb(242, 242, 242);
+}
+
+a{
+    text-decoration: none;
+    color: black;
+}
+
+button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+a:hover{
+    color: purple;
+}
+
+canvas {
+    display: none;
+}
+
+.body-section {
+    height: 100%;
+    width: 700px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+header{
+    width: 100%;
+}
+
+.title-section {
+    height: 80px;
+    width: 100%;
+    margin: 0 auto;
+    padding-top: 80px;
+}
+
+#header-title {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+#header-desc{
+    margin-top: 10px;
+    margin-bottom: 10px;
+    position: static;
+}
+
+.main-section {
+    margin: 0px;
+}
+
+#sensor-state {
+    height: 270px;
+    padding: 10px;
+}
+
+#sensor-state-text {
+    margin-bottom: 5px;
+}
+
+#sensor-state-img{
+    display: block;
+    margin: 0px auto;
+    width: 150px;
+}
+
+.control-section {
+    height: 50px;
+    margin: 20px;
+    position: relative;
+}
+
+#sensor-ctrl-btn {
+    background-color: rgb(124, 120, 119);
+    color: rgb(242, 242, 242);
+    width: 180px;
+    height: 45px;
+    border-radius: 10px;
+    border: 1px solid grey;
+}
+
+#sensor-ctrl-btn:hover {
+    background-color: rgb(141, 136, 134);
+}
+
+#load-btn {
+    background-color: rgb(124, 120, 119);
+    color: rgb(242, 242, 242);
+    width: 180px;
+    height: 45px;
+    border-radius: 10px;
+    border: 1px solid grey;
+
+    display: none;
+}
+
+#play-btn {
+    background-color: rgb(124, 120, 119);
+    color: rgb(242, 242, 242);
+    width: 180px;
+    height: 45px;
+    border-radius: 10px;
+    border: 1px solid grey;
+
+    display: none;
+}
+
+#save-btn {
+    background-color: rgb(124, 120, 119);
+    color: rgb(242, 242, 242);
+    width: 180px;
+    height: 45px;
+    border-radius: 10px;
+    border: 1px solid grey;
+
+    display: none;
+}
+
+#save-link {
+    display: none;
+}
+
+#progm-ctrl-btn {
+    position: absolute;
+    top: 15px;
+    left: 450px;
+    font-size: 11px;
+    border-radius: 5px;
+    border: 0.5px solid darkgray
+}

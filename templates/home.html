@@ -1,0 +1,29 @@
+{% extends 'layout.html' %}
+{% block desc %}
+<!-- header-desc -->
+{% endblock %}
+
+{% block main_context %}
+<div id="sensor-state">
+    {% if sensor.state == True %}
+    <h4 id="sensor-state-text">Sensor is working</h4>
+    <img id="sensor-state-img" src="{{ url_for('static', filename='image/sensor_on.png') }}" alt="sensor on"/>
+    {% else %}
+    <h4 id="sensor-state-text">Sensor is stopping</h4>
+    <img id="sensor-state-img" src="{{ url_for('static', filename='image/sensor_off.png') }}" alt="sensor off"/>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block buttons %}
+{% if sensor.state == True %}
+    <a href="/sensor/off"><button id="sensor-ctrl-btn">SENSOR OFF</button></a>
+    <!-- /sensor/off로 들어왔을 때 result.html 호출? -->
+{% else %}
+    <a href="/sensor/on"><button id="sensor-ctrl-btn">SENSOR ON</button></a>
+    <a href="/result"><button>LOAD DATA</button></a>
+{% endif %}
+{% endblock %}
+{% block javascript %}
+
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends 'layout.html' %}
+{% block desc %}
+<h4 id="header-desc">from {{ result.from }} -------------- to {{ result.to }} </h4>
+{% endblock %}
+{% block main_context %}
+<canvas id="myCanvas" width="700" height="280"></canvas>
+{% endblock %}
+
+{% block buttons %}
+<a href="/play"><button id="play-btn">PLAY</button></a>
+{% endblock %}
+
+{% block javascript %}
+<script src="{{ url_for('static', filename='JS/circle.js') }}"></script>
+<script>
+    const MAX = 2;
+    const MIN = -2;
+
+    const count = 10;
+    const circles = [];
+
+    const radiuses = [];
+    var totalLenght = 0;
+
+    for(let i = 0; i < count; i++){
+        const radius = Math.floor(Math.random() * 35) + 5;
+        radiuses.push(radius);
+        totalLenght += radius * 2;
+    }
+
+    totalLenght -= (count - 1) * 5;
+
+    var startPos = (canvas.width - totalLenght) / 2;
+    for(let i = 0; i < count; i++){
+        const radius = radiuses[i];
+
+        const x = startPos + radius;
+        const y = canvas.height / 2;
+        
+        const dx = Math.floor(Math.random() * (MAX - MIN) + MIN); // -2 ~ 2의 속도
+        const dy = Math.floor(Math.random() * (MAX - MIN) + MIN); // -2 ~ 2의 속도
+
+        // 랜덤 색상 만들기
+        const r = Math.round(Math.random() * 255);
+        const g = Math.round(Math.random() * 255);
+        const b = Math.round(Math.random() * 255);
+
+        const circle = new Circle(x, y, radius, dx, dy, r, g, b);
+        circles.push(circle);
+
+        startPos = x + radius - 5;
+    }
+
+    // render 함수
+    function layer() {
+        context.fillStyle = "rgb(242, 242, 242)";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        circles.forEach((circle) => {
+            circle.draw();
+            circle.acc();
+            // circle.line();
+            // circle.text();
+        })
+    }
+
+    function loadData() {
+        context.fillStyle = "rgb(242, 242, 242)";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        circles.forEach((circle) => {
+            circle.draw();
+        })
+    }
+
+    function move_circle() {
+        const chunks = [];
+        const streem = canvas.captureStream(25);
+        const rec = new MediaRecorder(streem);
+
+        rec.ondataavailable = e => chunks.push(e.data);
+
+        rec.onstop = function() {
+            exportVid(new Blob(chunks, {type: 'video/webm'}));
+            // loadData();
+            pause();
+        }
+        
+        rec.start();
+
+        play(); // 애니메이션 시작
+        // 버튼 클릭 비활성화
+        
+        setTimeout(()=>rec.stop(), 5000); // 3초 후 애니메이션 종료
+        // 끝난 후 다시 활성화(?)
+    }
+
+    // function exportVid(blob) {
+    //     const src = URL.createObjectURL(blob);
+    //     saveLink.download = 'myvid.webm';
+    //     saveLink.href = src;
+    //     saveLink.style.display = "inline";
+    //     saveBtn.style.display = "inline";
+    // }
+
+    function resetAndRestart() {
+        // 데이터베이스의 detect 테이블의 모든 레코드 삭제 & 페이지 리로드
+        window.location.reload();
+    }
+
+    loadData();
+</script>
+{% endblock %}
