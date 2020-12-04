@@ -1,20 +1,51 @@
 {% extends 'layout.html' %}
 {% block desc %}
-<h4 id="header-desc">from {{ result.from }} -------------- to {{ result.to }} </h4>
+<h4 id="header-desc">from {{ resultTime.from }} -------------- to {{ resultTime.to }} </h4>
 {% endblock %}
 {% block main_context %}
 <canvas id="myCanvas" width="700" height="280"></canvas>
 {% endblock %}
 
 {% block buttons %}
-<a href="/play"><button id="play-btn">PLAY</button></a>
+<button id="play-btn">PLAY</button>
 {% endblock %}
 
 {% block javascript %}
 <script src="{{ url_for('static', filename='JS/circle.js') }}"></script>
 <script>
-    const MAX = 2;
-    const MIN = -2;
+    var playBtn = document.querySelector("#play-btn");
+    playBtn.addEventListener('click', startPlay);
+
+    function startPlay(){
+        removeElement('play-btn');
+        addElement('control-section', 'a', 'save-link',
+         '<button id="save-btn">SAVE AS MP4</button>');
+
+        var saveLink = document.querySelector("#save-link");
+        saveLink.style.display = "none";
+        moveCircle();
+    }
+
+    function addElement(parentId, elementTag, elementId, html) {
+        // Adds an element to the document
+        var p = document.getElementById(parentId);
+        var newElement = document.createElement(elementTag);
+        newElement.setAttribute('id', elementId);
+        newElement.innerHTML = html;
+        p.appendChild(newElement);
+    }
+
+    function removeElement(elementId) {
+        // Removes an element from the document
+        var element = document.getElementById(elementId);
+        element.parentNode.removeChild(element);
+
+    }
+
+</script>
+<script>
+    const MAX_SPEED = 2;
+    const MIN_SPEED = -2;
 
     const count = 10;
     const circles = [];
@@ -37,8 +68,8 @@
         const x = startPos + radius;
         const y = canvas.height / 2;
         
-        const dx = Math.floor(Math.random() * (MAX - MIN) + MIN); // -2 ~ 2의 속도
-        const dy = Math.floor(Math.random() * (MAX - MIN) + MIN); // -2 ~ 2의 속도
+        const dx = Math.floor(Math.random() * (MAX_SPEED - MIN_SPEED) + MIN_SPEED); // -2 ~ 2의 속도
+        const dy = Math.floor(Math.random() * (MAX_SPEED - MIN_SPEED) + MIN_SPEED); // -2 ~ 2의 속도
 
         // 랜덤 색상 만들기
         const r = Math.round(Math.random() * 255);
@@ -59,8 +90,6 @@
         circles.forEach((circle) => {
             circle.draw();
             circle.acc();
-            // circle.line();
-            // circle.text();
         })
     }
 
@@ -73,7 +102,16 @@
         })
     }
 
-    function move_circle() {
+    function resetAndRestart() {
+        // 데이터베이스의 detect 테이블의 모든 레코드 삭제 & 페이지 리로드
+        window.location.reload();
+    }
+
+    loadData();
+</script>
+<script>
+
+    function moveCircle() {
         const chunks = [];
         const streem = canvas.captureStream(25);
         const rec = new MediaRecorder(streem);
@@ -81,33 +119,24 @@
         rec.ondataavailable = e => chunks.push(e.data);
 
         rec.onstop = function() {
-            exportVid(new Blob(chunks, {type: 'video/webm'}));
-            // loadData();
+            exportVid(new Blob(chunks, {type: 'video/mp4'}));
             pause();
         }
         
         rec.start();
 
-        play(); // 애니메이션 시작
-        // 버튼 클릭 비활성화
+        setTimeout(play, 3000); // 3초 후 애니메이션 시작
         
-        setTimeout(()=>rec.stop(), 5000); // 3초 후 애니메이션 종료
-        // 끝난 후 다시 활성화(?)
+        setTimeout(()=>rec.stop(), 10000); // 7초 후 애니메이션 종료
+        
     }
 
-    // function exportVid(blob) {
-    //     const src = URL.createObjectURL(blob);
-    //     saveLink.download = 'myvid.webm';
-    //     saveLink.href = src;
-    //     saveLink.style.display = "inline";
-    //     saveBtn.style.display = "inline";
-    // }
-
-    function resetAndRestart() {
-        // 데이터베이스의 detect 테이블의 모든 레코드 삭제 & 페이지 리로드
-        window.location.reload();
+    function exportVid(blob) {
+        var saveLink = document.querySelector("#save-link");
+        const src = URL.createObjectURL(blob);
+        saveLink.download = 'myvid.mp4';
+        saveLink.href = src;
+        saveLink.style.display = "inline";
     }
-
-    loadData();
 </script>
 {% endblock %}

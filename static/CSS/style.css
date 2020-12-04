@@ -10,13 +10,6 @@ a{
     color: black;
 }
 
-button {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
 .body-section {
     height: 100%;
     width: 700px;
@@ -65,35 +58,30 @@ header{
     width: 150px;
 }
 
-.control-section {
-    width: 500px;
+#control-section {
+    width: 400px;
     height: 50px;
-    margin: 20px;
-    background-color: lawngreen;
-    position: relative;
+    margin: 0 auto;
 }
 
-#sensor-ctrl-btn, 
-#load-btn, 
+#sensor-off-btn, 
+#sensor-on-btn,
 #play-btn, 
 #save-btn {
     background-color: rgb(124, 120, 119);
     color: rgb(242, 242, 242);
-    width: 180px;
-    height: 45px;
+    width: 150px;
+    height: 40px;
     border-radius: 10px;
     border: 1px solid grey;
+    margin: 5px;
 }
 
-#sensor-ctrl-btn:hover,
-#load-btn:hover,
+#sensor-off-btn:hover,
+#sensor-on-btn:hover,
 #play-btn:hover,
 #save-btn:hover {
     background-color: rgb(141, 136, 134);
-}
-
-#save-link {
-    display: none;
 }
 
 #progm-ctrl-btn {

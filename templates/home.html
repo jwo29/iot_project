@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 {% block desc %}
-<!-- header-desc -->
+    {{ super() }}
 {% endblock %}
 
 {% block main_context %}
@@ -17,13 +17,10 @@
 
 {% block buttons %}
 {% if sensor.state == True %}
-    <a href="/sensor/off"><button id="sensor-ctrl-btn">SENSOR OFF</button></a>
-    <!-- /sensor/off로 들어왔을 때 result.html 호출? -->
+    <a href="/result"><button id="sensor-off-btn">SENSOR OFF & LOAD DATA</button></a>
 {% else %}
-    <a href="/sensor/on"><button id="sensor-ctrl-btn">SENSOR ON</button></a>
-    <a href="/result"><button>LOAD DATA</button></a>
+    <a href="/sensor/on"><button id="sensor-on-btn">SENSOR ON</button></a>
 {% endif %}
 {% endblock %}
 {% block javascript %}
-
 {% endblock %}
