@@ -1,3 +1,4 @@
+<!-- home.html과 result.html가 상속받는 html 문서입니다 -->
 <!DOCTYPE html>
 <html>
     <head>
@@ -13,24 +14,24 @@
                     <div class="title-section">
                         <h1 id="header-title">Check The Number Of Visitors</h1>
                         {% block desc %}
-                        <!-- header-desc -->
+                        <!-- 여기에 시간 정보가 표현됩니다 -->
                         {% endblock %}
                     </div>
                 </header>
                 <div class="main-section">
                     {% block main_context %}
-                    
+                    <!-- 여기에 센터 상태 / 감지 결과가 표현됩니다 -->
                     {% endblock %}
                 </div>
             </div>
             <div id="control-section">
                 {% block buttons %}
-                
+                <!-- 여기에 프로그램 진행을 위한 버튼들이 표현됩니다 -->
                 {% endblock %}
             </div>    
         </div>
     </body>
     {% block javascript %}
-    
+    <!-- 여기에 자바스크립트 코드가 표현됩니다 -->
     {% endblock %}
 </html>
