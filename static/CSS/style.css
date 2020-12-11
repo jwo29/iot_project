@@ -1,6 +1,6 @@
 body{
     color: black;
-    font-family: 나눔바른펜, 굴림;
+    font-family: 나눔바른펜, 굴림, sans-serif;
     margin: 0px;
     background-color: rgb(242, 242, 242);
 }
@@ -12,7 +12,7 @@ a{
 
 .body-section {
     height: 100%;
-    width: 700px;
+    width:  900px;
     margin: 0 auto;
     text-align: center;
 }
@@ -40,12 +40,14 @@ header{
 }
 
 .main-section {
-    margin: 0px;
+    margin: 0 auto;
 }
 
 #sensor-state {
-    height: 270px;
-    padding: 10px;
+    width: 100%;
+    height: 380px;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 #sensor-state-text {
@@ -62,6 +64,8 @@ header{
     width: 400px;
     height: 50px;
     margin: 0 auto;
+    margin-bottom: 80px;
+    position: relative;
 }
 
 #sensor-off-btn, 
@@ -84,11 +88,15 @@ header{
     background-color: rgb(141, 136, 134);
 }
 
-#progm-ctrl-btn {
-    position: absolute;
-    top: 15px;
-    left: 450px;
+#reset-btn {
+    width: 80px;
+    height: 30px;
     font-size: 11px;
-    border-radius: 5px;
-    border: 0.5px solid darkgray
+    border-radius: 7px;
+    border: 1px solid darkgray;
+    margin: 5px;
+    margin-left: 10px;
+    position: absolute;
+    top: 10px;
+    left: 300px;
 }
