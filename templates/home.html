@@ -1,9 +1,10 @@
 {% extends 'layout.html' %}
+
 {% block desc %}
-    {{ super() }}
 {% endblock %}
 
 {% block main_context %}
+<!-- 센서 상태 표현 -->
 <div id="sensor-state">
     {% if sensor.state == True %}
     <h4 id="sensor-state-text">Sensor is working</h4>
@@ -17,10 +18,12 @@
 
 {% block buttons %}
 {% if sensor.state == True %}
-    <a href="/result"><button id="sensor-off-btn">SENSOR OFF & LOAD DATA</button></a>
+    <a href="/result"><button id="sensor-off-btn">SENSOR OFF &<br/>LOAD DATA</button></a>
+    <a href="/removeall"><button id="reset-btn">RESET &<br/>RESTART</button></a>
 {% else %}
     <a href="/sensor/on"><button id="sensor-on-btn">SENSOR ON</button></a>
 {% endif %}
 {% endblock %}
+
 {% block javascript %}
 {% endblock %}
