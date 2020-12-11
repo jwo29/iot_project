@@ -1,13 +1,16 @@
 {% extends 'layout.html' %}
+
 {% block desc %}
 <h4 id="header-desc">from {{ resultTime.from }} -------------- to {{ resultTime.to }} </h4>
 {% endblock %}
+
 {% block main_context %}
-<canvas id="myCanvas" width="700" height="280"></canvas>
+<canvas id="myCanvas" width="900" height="380"></canvas>
 {% endblock %}
 
 {% block buttons %}
 <button id="play-btn">PLAY</button>
+<a id="reset-link" href="/removeall"><button id="reset-btn">RESET &<br/>RESTART</button></a>
 {% endblock %}
 
 {% block javascript %}
@@ -17,17 +20,21 @@
     playBtn.addEventListener('click', startPlay);
 
     function startPlay(){
-        removeElement('play-btn');
+        removeElement('play-btn'); // 'PLAY' 버튼 삭제
         addElement('control-section', 'a', 'save-link',
-         '<button id="save-btn">SAVE AS MP4</button>');
+         '<button id="save-btn">SAVE AS MP4</button>'); // MP4 저장 버튼 생성
 
+        // 저장 버튼, 리셋 버튼 비가시화
         var saveLink = document.querySelector("#save-link");
+        var resetLink = document.querySelector("#reset-link");
         saveLink.style.display = "none";
-        moveCircle();
+        resetLink.style.display = "none";
+        
+        moveCircle(); // 원 움직이기(애니메이션 시작)
     }
 
     function addElement(parentId, elementTag, elementId, html) {
-        // Adds an element to the document
+        /* 엘리먼트 생성 */
         var p = document.getElementById(parentId);
         var newElement = document.createElement(elementTag);
         newElement.setAttribute('id', elementId);
@@ -36,7 +43,7 @@
     }
 
     function removeElement(elementId) {
-        // Removes an element from the document
+        /* 엘리먼트 삭제 */
         var element = document.getElementById(elementId);
         element.parentNode.removeChild(element);
 
@@ -44,30 +51,44 @@
 
 </script>
 <script>
-    const MAX_SPEED = 2;
-    const MIN_SPEED = -2;
+    /* 데이터 로드 및 canvas에 반영하기 */
 
-    const count = 10;
-    const circles = [];
+    const MAX_SPEED = 2; // 최대 스칼라 값
+    const MIN_SPEED = -2; // 최소 스칼라 값
+    const OVERLAP_SIZE = 5;
+    const DEFAULT_SIZE = 40; // 기본 반지름
 
-    const radiuses = [];
-    var totalLenght = 0;
+    var circleData = {{ resultData | tojson }}; // 반환된 resultData 사용
+
+    const count = circleData.length; // 원의 개수
+    const circles = []; // 원 객체를 담는 배열
+
+    const radiuses = []; // 각 원의 반지름을 담는 배열
+    var totalLenght = 0; // 화면에 그려지는 그래픽의 총 길이
 
     for(let i = 0; i < count; i++){
-        const radius = Math.floor(Math.random() * 35) + 5;
+        // 반지름 계산
+        const radius = circleData[i].count + DEFAULT_SIZE; // 시간 별 감지 횟수 + 기본 반지름
         radiuses.push(radius);
-        totalLenght += radius * 2;
+        totalLenght += radius * 2; // 원의 지름들을 더해나감
     }
 
-    totalLenght -= (count - 1) * 5;
+    /* 초기 원들은 OVERLAP_SIZE 만큼 양쪽에서 서로 겹쳐짐.
+        그래픽의 총 길이도 겹쳐지는 횟수(count-1)만큼 줄어들어야 함 */
+    totalLenght -= (count - 1) * OVERLAP_SIZE;
 
-    var startPos = (canvas.width - totalLenght) / 2;
+    var startPos = (canvas.width - totalLenght) / 2; // startPos: 첫번째 원의 왼쪽 끝 위치
     for(let i = 0; i < count; i++){
+        /* 원 객체 생성 및 초기화 */
         const radius = radiuses[i];
 
+        // 원의 중심(x, y)
         const x = startPos + radius;
         const y = canvas.height / 2;
-        
+
+        const info = `${circleData[i].time} ${circleData[i].count}`; // info = 'H:M count'
+
+        // 랜덤 벡터 값 생성
         const dx = Math.floor(Math.random() * (MAX_SPEED - MIN_SPEED) + MIN_SPEED); // -2 ~ 2의 속도
         const dy = Math.floor(Math.random() * (MAX_SPEED - MIN_SPEED) + MIN_SPEED); // -2 ~ 2의 속도
 
@@ -76,67 +97,73 @@
         const g = Math.round(Math.random() * 255);
         const b = Math.round(Math.random() * 255);
 
-        const circle = new Circle(x, y, radius, dx, dy, r, g, b);
+        // 원 객체 생성 및 배열에 담기
+        const circle = new Circle(x, y, radius, dx, dy, r, g, b, info);
         circles.push(circle);
 
-        startPos = x + radius - 5;
-    }
-
-    // render 함수
-    function layer() {
-        context.fillStyle = "rgb(242, 242, 242)";
-        context.fillRect(0, 0, canvas.width, canvas.height);
-
-        circles.forEach((circle) => {
-            circle.draw();
-            circle.acc();
-        })
+        // 다음 원의 시작 위치 조정
+        startPos = x + radius - OVERLAP_SIZE; // 현재 원의 오른쪽 끝 위치 - OVERLAP_SIZE(겹쳐지는 영역) 
     }
 
     function loadData() {
-        context.fillStyle = "rgb(242, 242, 242)";
+        /* 초기 canvas 그리기 */
+        context.fillStyle = "rgb(242, 242, 242)"; // canvas 배경색
         context.fillRect(0, 0, canvas.width, canvas.height);
 
-        circles.forEach((circle) => {
+        circles.forEach((circle) => { // 원 객체 배열에 담긴 각각의 원 그리기
             circle.draw();
+            circle.text();
         })
     }
 
-    function resetAndRestart() {
-        // 데이터베이스의 detect 테이블의 모든 레코드 삭제 & 페이지 리로드
-        window.location.reload();
-    }
-
-    loadData();
+    loadData(); // result.html이 열리면 canvas에 초기 원 그리기
 </script>
 <script>
+    /* 그래픽 움직이기 및 녹화하기 */
+
+    function layer() {
+        /* 변경된 내용을 반영하여 canvas 전체 그리기 */
+        context.fillStyle = "rgb(242, 242, 242)"; // canvas 배경색
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        circles.forEach((circle) => { // 원 객체 배열에 담긴 각각의 원 그리기
+            circle.acc();
+            circle.text();
+        })
+    }
 
     function moveCircle() {
         const chunks = [];
-        const streem = canvas.captureStream(25);
+        const streem = canvas.captureStream(25); // 녹화 영역 지정
         const rec = new MediaRecorder(streem);
 
         rec.ondataavailable = e => chunks.push(e.data);
 
         rec.onstop = function() {
+            /* 녹화 종료 후 mp4 다운 href 설정 및 애니메이션 종료*/
             exportVid(new Blob(chunks, {type: 'video/mp4'}));
             pause();
         }
         
-        rec.start();
+        rec.start(); // 녹화 시작
 
-        setTimeout(play, 3000); // 3초 후 애니메이션 시작
+        play(); // 애니메이션 시작
         
-        setTimeout(()=>rec.stop(), 10000); // 7초 후 애니메이션 종료
+        setTimeout(()=>rec.stop(), 7000); // 7초 후 녹화 및 애니메이션 종료
         
     }
 
     function exportVid(blob) {
         var saveLink = document.querySelector("#save-link");
+        var resetLink = document.querySelector("#reset-link");
+
         const src = URL.createObjectURL(blob);
-        saveLink.download = 'myvid.mp4';
+        saveLink.download = "myvid.mp4";
         saveLink.href = src;
+
+        // 저장 버튼 및 리셋 버튼 가시화
         saveLink.style.display = "inline";
+        resetLink.style.display = "inline";
     }
 </script>
 {% endblock %}
